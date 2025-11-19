@@ -1,5 +1,15 @@
 // 游戏系统集成补丁 - 将新系统整合到原游戏中
 
+// 这些增强系统会在运行期按需注入，在真正初始化之前先声明占位，避免访问时出现
+// ReferenceError 导致游戏初始化中断。
+let spriteRenderer = null;
+let animationController = null;
+let skillSystem = null;
+let questSystem = null;
+let achievementSystem = null;
+let difficultySystem = null;
+let enhancementSystem = null;
+
 // 在游戏初始化后调用此函数
 function initializeEnhancedSystems() {
     // 初始化精灵渲染器
