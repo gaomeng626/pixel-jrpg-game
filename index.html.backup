@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素风JRPG游戏 - 开源优化版</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="640" height="480"></canvas>
+        <div id="ui">
+            <div class="stat-box">
+                <div class="stat-label">角色等级</div>
+                <div class="stat-value">LV <span id="playerLevel">1</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">经验值</div>
+                <div class="stat-value"><span id="playerExp">0</span> / <span id="playerMaxExp">100</span></div>
+            </div>
+            <div class="stat-box" style="grid-column: span 2;">
+                <div class="stat-label">生命值</div>
+                <div class="hp-bar">
+                    <div class="hp-fill" id="hpFill" style="width: 100%;"></div>
+                </div>
+                <div class="stat-value" style="margin-top: 5px;">
+                    <span id="playerHp">100</span> / <span id="playerMaxHp">100</span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">💰 金币</div>
+                <div class="stat-value"><span id="playerGold">50</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">🧪 药水</div>
+                <div class="stat-value"><span id="playerPotions">3</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">📊 FPS</div>
+                <div class="stat-value"><span id="fps">60</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">🎯 击败</div>
+                <div class="stat-value"><span id="enemiesKilled">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dialogBox">
+        <div class="dialog-name" id="dialogName"></div>
+        <div class="dialog-text" id="dialogText"></div>
+        <div class="dialog-continue">▼ 按空格继续</div>
+    </div>
+
+    <div id="battleScreen">
+        <div class="battle-area">
+            <div class="combatant">
+                <div class="combatant-sprite">🗡️</div>
+                <div class="combatant-name">勇者</div>
+                <div class="hp-bar" style="width: 200px; margin: 0 auto;">
+                    <div class="hp-fill" id="battlePlayerHp" style="width: 100%;"></div>
+                </div>
+                <div class="stat-value" style="color: #fff; margin-top: 5px;">
+                    <span id="battlePlayerHpText">100/100</span>
+                </div>
+            </div>
+            <div class="combatant">
+                <div class="combatant-sprite" id="enemySprite">👾</div>
+                <div class="combatant-name" id="enemyName">史莱姆</div>
+                <div class="hp-bar" style="width: 200px; margin: 0 auto;">
+                    <div class="hp-fill" id="battleEnemyHp" style="width: 100%;"></div>
+                </div>
+                <div class="stat-value" style="color: #fff; margin-top: 5px;">
+                    <span id="battleEnemyHpText">50/50</span>
+                </div>
+            </div>
+        </div>
+        <div class="battle-actions" id="battleActions">
+            <button class="battle-btn" onclick="game.battleAttack()">⚔️ 攻击</button>
+            <button class="battle-btn" onclick="game.battleDefend()">🛡️ 防御</button>
+            <button class="battle-btn" onclick="game.battleSkill()">✨ 技能</button>
+            <button class="battle-btn" onclick="game.battleRun()">🏃 逃跑</button>
+        </div>
+        <div class="battle-log" id="battleLog"></div>
+    </div>
+
+    <div id="instructions">
+        <div class="instruction-title">操作说明 (键盘版)</div>
+        <div class="instruction-item">⬆️⬇️⬅️➡️ 移动/选择</div>
+        <div class="instruction-item">空格/回车 确认/互动</div>
+        <div class="instruction-item">I键 物品栏</div>
+        <div class="instruction-item">P键 商店(Tab切换)</div>
+        <div class="instruction-item">战斗: 1-4 数字键</div>
+        <div class="instruction-item">H键 使用药水</div>
+        <div class="instruction-item">ESC键 暂停/返回</div>
+        <div class="instruction-item">Ctrl+S 保存游戏</div>
+        <div class="instruction-item">M键 静音/取消静音</div>
+        <div class="instruction-item" style="color: #4ecca3; margin-top: 10px;">✨ ZzFX音效系统</div>
+        <div class="instruction-item" style="color: #4ecca3;">✨ IndexedDB存储</div>
+    </div>
+
+    <div id="pauseOverlay">
+        <div class="pause-menu">
+            <h2>游戏暂停</h2>
+            <div class="pause-stats">
+                <p>击败敌人数：<span id="pauseEnemies">0</span></p>
+                <p>当前等级：LV <span id="pauseLevel">1</span></p>
+                <p>金币：<span id="pauseGold">50</span></p>
+                <p>游戏时间：<span id="pauseTime">00:00</span></p>
+                <p>音效：<span id="pauseSoundStatus">开启</span></p>
+            </div>
+            <button class="pause-btn" onclick="game.togglePause()">继续游戏</button>
+            <button class="pause-btn" onclick="game.toggleSound()">切换音效</button>
+            <button class="pause-btn" onclick="game.saveGame()">保存游戏</button>
+            <button class="pause-btn" onclick="game.resetGame()">重新开始</button>
+        </div>
+    </div>
+
+    <!-- Inventory Modal -->
+    <div id="inventoryModal" class="modal-overlay">
+        <div class="game-modal">
+            <div class="modal-header">
+                <div class="modal-title">📦 物品栏</div>
+                <button class="close-btn" onclick="game.closeInventory()">×</button>
+            </div>
+            
+            <div class="equipment-slots">
+                <div class="equip-slot">
+                    <div class="equip-box" id="equipWeapon" onclick="game.unequipItem('weapon')"></div>
+                    <div class="equip-label">武器</div>
+                </div>
+                <div class="equip-slot">
+                    <div class="equip-box" id="equipArmor" onclick="game.unequipItem('armor')"></div>
+                    <div class="equip-label">防具</div>
+                </div>
+                <div class="equip-slot">
+                    <div class="equip-box" id="equipAccessory" onclick="game.unequipItem('accessory')"></div>
+                    <div class="equip-label">饰品</div>
+                </div>
+            </div>
+
+            <div class="modal-content">
+                <div class="inventory-grid" id="inventoryGrid">
+                    <!-- Items will be generated here -->
+                </div>
+                <div class="item-details">
+                    <div class="detail-icon" id="itemDetailIcon">❔</div>
+                    <div class="detail-name" id="itemDetailName">选择一个物品</div>
+                    <div class="detail-desc" id="itemDetailDesc">点击物品查看详情</div>
+                    <div class="detail-stats" id="itemDetailStats"></div>
+                    <button class="action-btn" id="itemActionBtn" style="display: none;" onclick="game.useSelectedItem()">使用</button>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <div style="float: left;">金币: <span id="inventoryGold">0</span> 💰</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="shopModal" class="modal-overlay">
+        <div class="game-modal">
+            <div class="modal-header">
+                <div class="modal-title">🛒 商店</div>
+                <button class="close-btn" onclick="game.closeShop()">×</button>
+            </div>
+            
+            <div class="shop-tabs">
+                <div class="shop-tab active" onclick="game.switchShopTab('buy')">购买</div>
+                <div class="shop-tab" onclick="game.switchShopTab('sell')">出售</div>
+            </div>
+
+            <div class="modal-content">
+                <div class="shop-list" id="shopList">
+                    <!-- Shop items -->
+                </div>
+                <div class="item-details">
+                    <div class="detail-icon" id="shopDetailIcon">❔</div>
+                    <div class="detail-name" id="shopDetailName">选择物品</div>
+                    <div class="detail-desc" id="shopDetailDesc">查看详情</div>
+                    <div class="detail-stats" id="shopDetailStats"></div>
+                    <div style="margin-top: 10px; color: #ff6b6b; font-weight: bold;" id="shopDetailPrice"></div>
+                    <button class="action-btn" id="shopActionBtn" style="display: none;" onclick="game.buyOrSellSelectedItem()">购买</button>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <div style="float: left;">金币: <span id="shopGold">0</span> 💰</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载画面 -->
+    <div id="loadingScreen">
+        <div class="loading-content">
+            <h2>🎮 像素风JRPG</h2>
+            <div class="loading-bar">
+                <div class="loading-fill" id="loadingFill"></div>
+            </div>
+            <p id="loadingText">初始化游戏...</p>
+            <p style="font-size: 12px; margin-top: 20px; color: #4ecca3;">
+                使用开源技术：ZzFX音效 | IndexedDB存储
+            </p>
+        </div>
+    </div>
+
+    <!-- 开源库 -->
+    <script src="libs/zzfx.js"></script>
+    <!-- LocalForage from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+    
+    <!-- 游戏主逻辑 -->
+    <script src="game.js"></script>
+</body>
+</html>

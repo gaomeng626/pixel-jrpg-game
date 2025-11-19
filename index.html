@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>像素风JRPG游戏 - 开源优化版</title>
+    <title>像素风JRPG游戏 - 豪华升级版</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -32,8 +32,17 @@
                 <div class="stat-value"><span id="playerGold">50</span></div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">🧪 药水</div>
-                <div class="stat-value"><span id="playerPotions">3</span></div>
+                <div class="stat-label">⭐ 技能点</div>
+                <div class="stat-value"><span id="playerSkillPoints">0</span></div>
+            </div>
+            <div class="stat-box" style="grid-column: span 2;">
+                <div class="stat-label">魔法值</div>
+                <div class="hp-bar" style="background: #2c3e50;">
+                    <div class="hp-fill" id="manaFill" style="width: 100%; background: linear-gradient(90deg, #3498db, #9b59b6);"></div>
+                </div>
+                <div class="stat-value" style="margin-top: 5px;">
+                    <span id="playerMana">100</span> / <span id="playerMaxMana">100</span>
+                </div>
             </div>
             <div class="stat-box">
                 <div class="stat-label">📊 FPS</div>
@@ -78,7 +87,7 @@
         <div class="battle-actions" id="battleActions">
             <button class="battle-btn" onclick="game.battleAttack()">⚔️ 攻击</button>
             <button class="battle-btn" onclick="game.battleDefend()">🛡️ 防御</button>
-            <button class="battle-btn" onclick="game.battleSkill()">✨ 技能</button>
+            <button class="battle-btn" onclick="game.openSkillMenu()">✨ 技能</button>
             <button class="battle-btn" onclick="game.battleRun()">🏃 逃跑</button>
         </div>
         <div class="battle-log" id="battleLog"></div>
@@ -88,8 +97,8 @@
         <div class="instruction-title">操作说明 (键盘版)</div>
         <div class="instruction-item">⬆️⬇️⬅️➡️ 移动/选择</div>
         <div class="instruction-item">空格/回车 确认/互动</div>
-        <div class="instruction-item">I键 物品栏</div>
-        <div class="instruction-item">P键 商店(Tab切换)</div>
+        <div class="instruction-item">I键 物品栏 | K键 技能</div>
+        <div class="instruction-item">Q键 任务 | P键 商店</div>
         <div class="instruction-item">战斗: 1-4 数字键</div>
         <div class="instruction-item">H键 使用药水</div>
         <div class="instruction-item">ESC键 暂停/返回</div>
@@ -207,10 +216,16 @@
 
     <!-- 开源库 -->
     <script src="libs/zzfx.js"></script>
+    
+    <!-- 游戏配置和系统 -->
+    <script src="gameConfig.js"></script>
+    <script src="gameEngine.js"></script>
+    <script src="spriteRenderer.js"></script>
     <!-- LocalForage from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
     
     <!-- 游戏主逻辑 -->
     <script src="game.js"></script>
+    <script src="gameIntegration.js"></script>
 </body>
 </html>
