@@ -10,6 +10,13 @@ const ITEMS = {
     key: { id: 'key', name: '钥匙', type: 'misc', icon: '🔑', desc: '可以打开上锁的门或宝箱', price: 20, stackable: true }
 };
 
+// 将新增物品合并到旧的物品表中，供所有系统复用
+if (typeof NEW_ITEMS !== 'undefined') {
+    Object.assign(ITEMS, NEW_ITEMS);
+}
+
+const ALL_ITEMS = ITEMS;
+
 const game = {
     canvas: null,
     ctx: null,
